@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>주문 정리 · 총무해방</title>
+  <link rel="stylesheet" href="order.css" />
+</head>
+<body>
+  <header class="bar">
+    <div class="bar-in">
+      <span class="logo" aria-hidden="true"></span>
+      <b class="brand">총무해방</b>
+      <span class="tag">단톡방 주문, 복붙 한 번이면 끝!</span>
+      <span id="status" class="status" aria-live="polite">서버 확인 중…</span>
+      <button id="sample" class="btn solid sm" type="button">샘플로 체험하기 →</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="pill">AI · 취소·변경 자동 반영</span>
+    <h1>복잡한 단톡방 주문,<br /><em>총무해방</em>이 정리해요.</h1>
+    <p>대화를 붙여넣으면 명단과 주문을 메뉴판에 맞춰 계산하고,<br />카톡방에 그대로 붙여넣을 글로 만들어 드려요.</p>
+  </section>
+
+  <ol class="steps" id="steps" aria-label="진행 단계">
+    <li class="on" data-s="1"><i>01</i>채팅 붙여넣기</li>
+    <li data-s="2"><i>02</i>메뉴와 가격 설정</li>
+    <li data-s="3"><i>03</i>주문 검토</li>
+    <li data-s="4"><i>04</i>주문 결과</li>
+  </ol>
+
+  <main class="wrap">
+    <section class="card" id="s1">
+      <div class="card-head">
+        <div><small class="num">01</small><h2>단체 채팅을 붙여넣어 주세요</h2>
+          <p class="sub">카카오톡 내보내기, [이름] [시간] 메시지, 이름: 메시지 형식을 읽어요.</p></div>
+      </div>
+      <textarea id="chat" rows="9" placeholder="[민지] [오전 9:10] 아아 2잔, 카페라떼 한잔이요&#10;준호: 저는 뜨아 하나 부탁해요"></textarea>
+      <div class="foot">
+        <span id="chat-count" class="muted">0자</span>
+        <button id="reset" class="btn soft" type="button">비우기</button>
+      </div>
+    </section>
+
+    <section class="card" id="s2">
+      <div class="card-head">
+        <div><small class="num">02</small><h2>메뉴와 가격을 설정해 주세요</h2>
+          <p class="sub">가격표 글이나 메뉴판 사진을 AI가 읽어 채워 드려요. 직접 고치거나 추가해도 돼요.</p></div>
+        <button id="add-menu" class="btn soft" type="button">+ 메뉴 추가</button>
+      </div>
+
+      <div class="menu-src">
+        <div class="seg" role="tablist">
+          <button type="button" role="tab" class="on" data-tab="text" aria-selected="true">가격표 글</button>
+          <button type="button" role="tab" data-tab="image" aria-selected="false">메뉴판 사진</button>
+        </div>
+        <textarea id="menu-text" rows="5" placeholder="아메리카노(아이스)  2,500원&#10;카페라떼  4,000원"></textarea>
+        <div id="menu-image-box" hidden>
+          <input id="menu-image" type="file" accept="image/*" />
+          <img id="menu-preview" alt="메뉴판 미리보기" hidden />
+        </div>
+        <button id="read-menu" class="btn soft" type="button">AI로 메뉴 읽기</button>
+      </div>
+
+      <div id="menu-rows" class="menu-rows"></div>
+      <p id="menu-empty" class="muted center">메뉴를 아직 안 넣었어요. 없어도 분석은 되지만 금액 계산은 빠져요.</p>
+      <p id="error" class="error" role="alert" hidden></p>
+      <div class="foot end">
+        <button id="analyze" class="btn solid" type="button">주문 분석하기 →</button>
+      </div>
+    </section>
+
+    <section class="card" id="s3" hidden>
+      <div class="card-head">
+        <div><small class="num">03</small><h2>주문을 확인해 주세요</h2>
+          <p class="sub">AI가 읽은 결과예요. 틀린 곳은 바로 고치면 결과에 반영돼요.</p></div>
+      </div>
+      <div id="issues" class="issues" hidden></div>
+      <div id="people"></div>
+    </section>
+
+    <section class="card" id="s4" hidden>
+      <div class="card-head">
+        <div><small class="num">04</small><h2>카톡에 붙여넣을 글</h2>
+          <p class="sub">복사해서 단톡방에 그대로 붙여넣으세요.</p></div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="opts">
+        <label><input type="checkbox" id="opt-prices" checked /> 금액 표시</label>
+        <label><input type="checkbox" id="opt-people" checked /> 사람별 포함</label>
+        <label>제목 <input id="opt-title" value="주문 정리" maxlength="20" /></label>
+        <label>단위 <input id="opt-unit" value="개" maxlength="4" size="3" /></label>
+      </div>
+      <pre id="kakao" class="kakao"></pre>
+      <div class="foot">
+        <span id="copied" class="okmsg" hidden>복사했어요!</span>
+        <button id="copy" class="btn solid" type="button">복사하기</button>
+      </div>
+    </section>
+
+    <p class="note">🔒 붙여넣은 대화와 메뉴판은 분석을 위해 OpenAI API로 전송돼요. 금액 계산과 글 양식은 이 브라우저에서 처리해요.</p>
+  </main>
+
+  <script src="order-core.js"></script>
+  <script src="order.js"></script>
+</body>
+</html>

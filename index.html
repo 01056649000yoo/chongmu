@@ -75,6 +75,60 @@
       </div>
     </section>
 
+    <section class="card ai-card" id="aiSection">
+      <div class="row" style="align-items:center">
+        <h2 style="margin:0"><svg class="icon" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3zm6 11l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9L18 14z" />
+          </svg> AI로 빠르게</h2>
+        <div style="flex:1"></div>
+        <span id="aiHealth" class="ai-status"></span>
+      </div>
+
+      <div class="ai-grid">
+        <div class="ai-box">
+          <strong>영수증 · 메뉴판 · 주문 사진</strong>
+          <p class="muted small">사진을 올리면 AI가 항목·금액·결제자를 읽어 지출 칸을 채워요.</p>
+          <div class="row">
+            <button type="button" class="btn" data-ai-pick="receipt">영수증 사진</button>
+            <button type="button" class="btn" data-ai-pick="menu">메뉴판 · 주문 사진</button>
+          </div>
+          <input id="aiPhoto" type="file" accept="image/*" capture="environment" style="display:none" />
+          <div id="aiPhotoStatus" class="ai-status"></div>
+        </div>
+
+        <div class="ai-box">
+          <strong>주문 · 영수증 글</strong>
+          <p class="muted small">주문 내역 글을 붙여 넣으면 날짜별 지출로 나눠 줘요.</p>
+          <textarea id="aiText" rows="3" placeholder="예: 5/2 점심 김밥 12,000, 택시 18,000(지민 결제)"></textarea>
+          <div class="row" style="justify-content:flex-end">
+            <button type="button" class="btn primary" id="aiTextRun">분석하기</button>
+          </div>
+          <div id="aiTextStatus" class="ai-status"></div>
+        </div>
+      </div>
+
+      <div id="aiDrafts" class="ai-drafts"></div>
+
+      <div class="ai-grid">
+        <div class="ai-box">
+          <div class="row" style="align-items:center">
+            <strong>정산 AI 설명</strong>
+            <div style="flex:1"></div>
+            <button type="button" class="btn small" id="aiSummaryRun">정산 설명 보기</button>
+          </div>
+          <div id="aiSummaryOut" class="ai-summary"></div>
+        </div>
+        <div class="ai-box">
+          <strong>정산 챗 (총무 도우미)</strong>
+          <div id="aiChatLog" class="ai-chat-log"></div>
+          <div class="row" style="margin-top:6px">
+            <input id="aiChatInput" type="text" placeholder="예: 지금 정산하면 누가 누구에게 얼마를 줘야 해?" style="flex:1" />
+            <button type="button" class="btn primary" id="aiChatSend">보내기</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <div class="grid">
       <section class="card">
         <div class="row">
@@ -194,8 +248,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <!-- App Scripts -->
-  <script src="app.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+  <script src="ai.js"></script>
 
   <!-- Auth Event Listeners -->
   <script>

@@ -368,3 +368,32 @@ footer a { color: var(--text) !important; }
   .auth-actions { margin-top: 2px; }
   .auth-actions .btn { flex: 1; }
 }
+
+/* ===== AI (총무해방) ===== */
+.ai-card { margin-bottom: 16px; }
+.ai-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 12px; }
+.ai-box { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: #fafafa; min-width: 0; }
+.ai-box > strong { display: block; font-size: 13px; margin-bottom: 4px; }
+.ai-box p { margin: 0 0 8px; }
+.ai-box textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--line); background: #fff; resize: vertical; }
+.ai-status { font-size: 12px; min-height: 16px; margin-top: 6px; color: var(--sub); overflow-wrap: anywhere; }
+.ai-status.ok { color: #2c6e55; }
+.ai-status.warn { color: #8a6a1f; }
+.ai-status.err { color: var(--danger); }
+.ai-drafts { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.ai-drafts:empty { display: none; }
+.ai-draft { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.ai-draft-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.ai-draft-meta { color: var(--sub); font-size: 12px; white-space: nowrap; }
+.ai-summary { margin-top: 8px; font-size: 13px; line-height: 1.6; }
+.ai-summary-text { white-space: pre-wrap; }
+.ai-tips { margin: 8px 0 0; padding-left: 18px; color: var(--sub); }
+.ai-chat-log { height: 150px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 8px; display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.ai-msg { max-width: 85%; padding: 8px 10px; border-radius: 10px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ai-msg.user { align-self: flex-end; background: #262626; color: #fff; }
+.ai-msg.assistant { align-self: flex-start; background: var(--muted); }
+.ai-msg.busy { color: var(--sub); }
+.ai-msg.err { color: var(--danger); }
+@media (max-width: 760px) {
+  .ai-grid { grid-template-columns: 1fr; }
+}

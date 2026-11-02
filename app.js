@@ -36,30 +36,53 @@ function compute(participants = state.participants, expenses = state.expenses) {
   const balances = {}; // id -> {paid, owed, net}
   participants.forEach((p) => (balances[p.id] = { paid: 0, owed: 0, net: 0 }));
 
+  // 1원 단위: 결제액은 그대로 더하고, 부담액은 내림 몫 + 남은 원(앞쪽부터 1원)으로 나눠
+  // 어떤 경우에도 결제 합계와 부담 합계가 정확히 같아지게 한다 (개별 금액 분배는 적힌 값 그대로).
   expenses.forEach((exp) => {
     const amount = Math.round(Number(exp.amount) || 0);
     if (!amount) return;
     if (balances[exp.payerId]) balances[exp.payerId].paid += amount;
-    const n = Array.isArray(exp.beneficiaries) ? exp.beneficiaries.length : 0;
-    if (n > 0) {
-      if (exp.splitMode === 'custom' && exp.shares && typeof exp.shares === 'object') {
-        exp.beneficiaries.forEach((id) => {
-          const s = clamp0(exp.shares[id]);
-          if (balances[id]) balances[id].owed += s;
-        });
-      } else {
-        const share = amount / n;
-        exp.beneficiaries.forEach((id) => {
-          if (balances[id]) balances[id].owed += share;
-        });
-      }
+    const ben = Array.isArray(exp.beneficiaries) ? exp.beneficiaries : [];
+    if (!ben.length) return;
+    if (exp.splitMode === 'custom' && exp.shares && typeof exp.shares === 'object') {
+      let written = 0;
+      ben.forEach((id) => {
+        const v = clamp0(exp.shares[id]);
+        written += v;
+        if (balances[id]) balances[id].owed += v;
+      });
+      const gap = amount - written;
+      if (gap !== 0 && balances[ben[0]]) balances[ben[0]].owed += gap;
+    } else {
+      const base = Math.floor(amount / ben.length);
+      const extra = amount - base * ben.length;
+      ben.forEach((id, k) => {
+        if (balances[id]) balances[id].owed += base + (k < extra ? 1 : 0);
+      });
     }
   });
 
   participants.forEach((p) => {
     const b = balances[p.id];
-    b.net = Math.round(b.paid - b.owed);
+    b.owed = Math.round(b.owed);
+    b.paid = Math.round(b.paid);
+    b.net = b.paid - b.owed;
   });
+
+  let owedSum = 0;
+  for (const id in balances) owedSum += balances[id].owed;
+  let paidSum = 0;
+  for (const id in balances) paidSum += balances[id].paid;
+  const leftover = paidSum - owedSum;
+  if (leftover !== 0) {
+    // 잘못 저장된(합이 총액과 안 맞는) 개별 금액 등을 남은 차액만큼 결제자에게 붙여 총합을 맞춘다
+    const fixTarget = participants.filter((p) => balances[p.id].paid > 0);
+    const target = fixTarget[0] || participants[0];
+    if (target) {
+      balances[target.id].owed += leftover;
+      balances[target.id].net = balances[target.id].paid - balances[target.id].owed;
+    }
+  }
 
   const creditors = [];
   const debtors = [];
@@ -372,6 +395,9 @@ document.getElementById('addExpenseBtn').addEventListener('click', () => {
     if (ex) {
       ex.title = title;
       ex.amount = amount;
+      ex.originalAmount = rawAmount;
+      ex.currency = currency;
+      ex.exchangeRate = exchangeRate;
       ex.payerId = payerId;
       ex.beneficiaries = beneficiaries;
       const splitMode = document.getElementById('splitCustom').checked ? 'custom' : 'equal';

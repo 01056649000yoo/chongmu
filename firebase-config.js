@@ -157,9 +157,11 @@ async function saveToFirestore() {
     }
 }
 
-// Override saveState to also save to Firestore
-const originalSaveState = saveState;
-saveState = function () {
-    originalSaveState();
-    saveToFirestore();
-};
+// saveState 뒤에 Firestore 저장을 덧붙인다 (app.js 의 saveState 는 선언식이라 덮어쓰기로만 가능)
+{
+    const baseSaveState = saveState;
+    saveState = function () {
+        baseSaveState();
+        saveToFirestore();
+    };
+}

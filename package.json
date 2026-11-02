@@ -1,0 +1,19 @@
+{
+  "name": "chongmu",
+  "version": "0.2.0",
+  "description": "여행 정산 + AI(영수증·메뉴판·주문 분석, 정산 챗)",
+  "main": "server/server.js",
+  "scripts": {
+    "test": "node --test server/test/*.test.js",
+    "start": "node --env-file-if-exists=.env server/server.js",
+    "dev": "node --watch --env-file-if-exists=.env server/server.js"
+  },
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "openai": "^7.45.1"
+  }
+}

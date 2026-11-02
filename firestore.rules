@@ -1,0 +1,11 @@
+rules_version = '2';
+// 모두 로그인한 사용자끼리만, 세션 문서를 함께 읽고 쓸 수 있다 (누구나 쓰기 금지)
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /sessions/{sessionId} {
+      allow read, write: if request.auth != null
+        && sessionId is string
+        && sessionId.size() <= 40;
+    }
+  }
+}
