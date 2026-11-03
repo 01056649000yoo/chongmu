@@ -5,6 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>여행 정산 | Trip Splitter</title>
+  <link rel="preload" href="assets/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
 </head>
 
@@ -37,12 +38,15 @@
             <label for="authPassword">비밀번호</label>
             <div class="password-field">
               <input id="authPassword" name="password" type="password" autocomplete="current-password" placeholder="비밀번호 입력" required />
-              <button id="togglePassword" type="button" aria-label="비밀번호 표시" aria-pressed="false">보기</button>
+              <button id="togglePassword" class="icon-btn" type="button" title="비밀번호 표시" aria-label="비밀번호 표시" aria-pressed="false">
+                <svg class="icon eye-on" aria-hidden="true" viewBox="0 0 24 24"><use href="assets/icons/lucide.svg#eye"></use></svg>
+                <svg class="icon eye-off" aria-hidden="true" viewBox="0 0 24 24"><use href="assets/icons/lucide.svg#eye-off"></use></svg>
+              </button>
             </div>
           </div>
           <div class="auth-actions">
-            <button id="signInBtn" type="submit" class="btn primary">로그인</button>
-            <button id="signUpBtn" type="button" class="btn">회원가입</button>
+            <button id="signInBtn" type="submit" class="btn primary"><span class="button-label">로그인</span></button>
+            <button id="signUpBtn" type="button" class="btn"><span class="button-label">회원가입</span></button>
           </div>
         </div>
       </form>
@@ -145,9 +149,9 @@
           <div>
             <label for="expAmount">금액</label>
             <div class="row" style="gap:4px">
-              <input id="expAmount" type="number" inputmode="decimal" min="0" step="1" placeholder="예: 100"
+              <input id="expAmount" type="number" inputmode="decimal" min="0" step="1" placeholder="0"
                 style="flex:2" />
-              <select id="expCurrency" style="flex:1">
+              <select id="expCurrency" aria-label="통화" style="flex:1">
                 <option value="KRW">₩ 원</option>
                 <option value="USD">$ 달러</option>
                 <option value="JPY">¥ 엔</option>
@@ -180,7 +184,7 @@
           </div>
         </div>
         <!-- 분배 방식 -->
-        <div class="row" style="margin-top:8px">
+        <div class="row" role="group" aria-label="분배 방식" style="margin-top:8px">
           <label><input type="radio" name="splitMode" id="splitEqual" value="equal" checked> 균등 분배</label>
           <label><input type="radio" name="splitMode" id="splitCustom" value="custom"> 개별 금액</label>
         </div>
@@ -248,8 +252,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <!-- App Scripts -->
-  <script src="firebase-config.js"></script>
+  <script src="ui.js"></script>
   <script src="app.js"></script>
+  <script src="firebase-config.js"></script>
   <script src="ai.js"></script>
 
   <!-- Auth Event Listeners -->
@@ -258,13 +263,13 @@
       const input = document.getElementById('authPassword');
       const visible = input.type === 'password';
       input.type = visible ? 'text' : 'password';
-      event.currentTarget.textContent = visible ? '숨기기' : '보기';
+      event.currentTarget.title = visible ? '비밀번호 숨기기' : '비밀번호 표시';
       event.currentTarget.setAttribute('aria-pressed', String(visible));
       event.currentTarget.setAttribute('aria-label', visible ? '비밀번호 숨기기' : '비밀번호 표시');
     });
 
     // Sign In
-    document.getElementById('loginForm').addEventListener('submit', (event) => {
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value;
@@ -272,11 +277,12 @@
         alert('이메일과 비밀번호를 입력하세요.');
         return;
       }
-      signIn(email, password);
+      await TripUI.runBusy(document.getElementById('signInBtn'), () => signIn(email, password),
+        [document.getElementById('signInBtn'), document.getElementById('signUpBtn')]);
     });
 
     // Sign Up
-    document.getElementById('signUpBtn').addEventListener('click', () => {
+    document.getElementById('signUpBtn').addEventListener('click', async () => {
       if (!document.getElementById('loginForm').reportValidity()) return;
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value;
@@ -288,7 +294,8 @@
         alert('비밀번호는 6자 이상이어야 합니다.');
         return;
       }
-      signUp(email, password);
+      await TripUI.runBusy(document.getElementById('signUpBtn'), () => signUp(email, password),
+        [document.getElementById('signInBtn'), document.getElementById('signUpBtn')]);
     });
 
     // Sign Out
@@ -341,10 +348,9 @@
   </footer>
 
   <!-- Contact Modal -->
-  <div id="contactModal"
-    style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center;">
-    <div class="card" style="width:90%; max-width:400px; margin:auto;">
-      <h2 style="margin-top:0;">개발자에게 문의</h2>
+  <dialog id="contactModal" aria-labelledby="contactTitle">
+    <div class="card">
+      <h2 id="contactTitle">개발자에게 문의</h2>
       <form id="contactForm" action="" method="POST">
         <input type="hidden" name="_subject" value="[Trip Splitter] 문의" />
         <input type="hidden" name="_captcha" value="false" />
@@ -355,16 +361,15 @@
         <div style="margin-bottom:12px;">
           <label for="contactMessage">문의 내용</label>
           <textarea name="message" id="contactMessage" required rows="5"
-            style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); background:var(--muted); resize:vertical;"
             placeholder="문의 내용을 입력하세요..."></textarea>
         </div>
         <div class="row" style="justify-content:flex-end; gap:8px;">
           <button type="button" id="closeModalBtn" class="btn">취소</button>
-          <button type="submit" class="btn primary">보내기</button>
+          <button type="submit" class="btn primary"><span class="button-label">보내기</span></button>
         </div>
       </form>
     </div>
-  </div>
+  </dialog>
 
   <script>
     // Contact modal logic
@@ -377,16 +382,21 @@
     const formEndpoint = 'https://formsubmit.co/ajax/' + p1 + '@' + p2;
 
     document.getElementById('contactBtn').addEventListener('click', () => {
-      modal.style.display = 'flex';
+      TripUI.openDialog(modal);
     });
 
     document.getElementById('closeModalBtn').addEventListener('click', () => {
-      modal.style.display = 'none';
+      TripUI.closeDialog(modal);
+    });
+
+    modal.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      TripUI.closeDialog(modal);
     });
 
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
-        modal.style.display = 'none';
+        TripUI.closeDialog(modal);
       }
     });
 
@@ -395,26 +405,28 @@
 
       const formData = new FormData(form);
 
-      try {
-        const response = await fetch(formEndpoint, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
+      await TripUI.runBusy(form.querySelector('button[type="submit"]'), async () => {
+        try {
+          const response = await fetch(formEndpoint, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
 
-        if (response.ok) {
-          alert('문의가 전송되었습니다. 감사합니다!');
-          form.reset();
-          modal.style.display = 'none';
-        } else {
-          alert('전송에 실패했습니다. 다시 시도해 주세요.');
+          if (response.ok) {
+            alert('문의가 전송되었습니다. 감사합니다!');
+            form.reset();
+            await TripUI.closeDialog(modal);
+          } else {
+            alert('전송에 실패했습니다. 다시 시도해 주세요.');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('전송 중 오류가 발생했습니다.');
         }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('전송 중 오류가 발생했습니다.');
-      }
+      });
     });
   </script>
 </body>

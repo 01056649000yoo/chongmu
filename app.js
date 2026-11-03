@@ -124,13 +124,15 @@ function renderParticipants() {
     renameBtn.dataset.action = 'rename';
     renameBtn.dataset.id = p.id;
     renameBtn.title = '이름 바꾸기';
-    renameBtn.textContent = '✎';
+    renameBtn.setAttribute('aria-label', `${p.name} 이름 바꾸기`);
+    renameBtn.innerHTML = TripUI.icon('pencil');
     const removeBtn = document.createElement('button');
     removeBtn.className = 'icon-btn danger';
     removeBtn.dataset.action = 'remove';
     removeBtn.dataset.id = p.id;
     removeBtn.title = '삭제';
-    removeBtn.textContent = '×';
+    removeBtn.setAttribute('aria-label', `${p.name} 삭제`);
+    removeBtn.innerHTML = TripUI.icon('x');
     chip.appendChild(nameSpan);
     chip.appendChild(renameBtn);
     chip.appendChild(removeBtn);
@@ -144,7 +146,7 @@ function renderParticipants() {
   benBox.innerHTML = state.participants
     .map((p) => {
       const id = `ben-${p.id}`;
-      return `<label class="chip" for="${id}" style="cursor:pointer"><input style="margin-right:6px" type="checkbox" id="${id}" value="${p.id}" checked> ${escapeHtml(p.name)}</label>`;
+      return `<label class="chip" for="${id}"><input type="checkbox" id="${id}" value="${p.id}" checked><span>${escapeHtml(p.name)}</span></label>`;
     })
     .join('');
 
@@ -198,8 +200,8 @@ function renderExpenses() {
       <td class="right">${exp.beneficiaries.length ? (exp.splitMode === 'custom' ? '개별' : `₩ ${money(perHead)}`) : '—'}</td>
       <td>
         <div class="row" style="gap:6px">
-          <button class="btn small" data-action="edit-exp" data-id="${exp.id}">편집</button>
-          <button class="btn small danger" data-action="del-exp" data-id="${exp.id}">삭제</button>
+          <button class="btn small icon-only" data-action="edit-exp" data-id="${exp.id}" title="지출 편집" aria-label="${escapeHtml(exp.title)} 편집">${TripUI.icon('pencil')}</button>
+          <button class="btn small icon-only danger" data-action="del-exp" data-id="${exp.id}" title="지출 삭제" aria-label="${escapeHtml(exp.title)} 삭제">${TripUI.icon('x')}</button>
         </div>
       </td>
     `;
