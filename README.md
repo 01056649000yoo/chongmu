@@ -64,14 +64,19 @@ AI는 구조화 출력(JSON Schema)으로 받아 형식이 어긋나지 않습�
 
 ### Firebase (선택)
 
-`firebase-config.js` 로 로그인·세션 공유를 켜 둡니다. Firestore 보안 규칙 예시는 [firestore.rules](firestore.rules).
+`public/firebase-config.js` 로 로그인·세션 공유를 켜 둡니다. Firestore 보안 규칙 예시는 [firestore.rules](firestore.rules).
 
-### 카톡 주문 정리 (`/order.html`)
+### 카톡 주문 정리 (첫 화면 `/`)
 
 단톡방 주문 대화를 통째로 붙여 넣고 메뉴판(가격표 글 또는 사진)을 넣으면, 취소·변경을 반영한 사람별 최종 주문을
 메뉴판과 매칭해 금액까지 계산하고 카톡에 붙여 넣을 글로 만듭니다.
 
-- AI(`POST /api/order/analyze`)는 "누가 무엇을 몇 개"와 메뉴 번호 매칭만 읽고, **금액·합계·양식은 코드가 계산**합니다(`order-core.js`).
+- AI(`POST /api/order/analyze`)는 "누가 무엇을 몇 개"와 메뉴 번호 매칭만 읽고, **금액·합계·양식은 코드가 계산**합니다(`public/order-core.js`).
 - 결과 화면에서 메뉴·수량을 고치면 카톡 글이 바로 다시 만들어집니다.
 - 모델은 `OPENAI_MODEL`(기본 `gpt-6-luna`), 주문 분석 추론 강도는 `ORDER_REASONING`(기본 `medium`).
 - 예시: 화면의 "예시 넣기"(`testdata/chat-*.txt`, `menu-*.txt`).
+
+### 폴더 구조와 배포
+
+화면 파일은 모두 `public/` 에 있고 Node 서버(`npm start`)가 제공합니다. `/` 는 주문 정리, `/trip.html` 은 여행 정산입니다.
+AI 기능은 서버가 있어야 하므로 **정적 사이트로 배포하면 동작하지 않습니다.** 배포한 뒤 `/api/health` 가 JSON 으로 응답하는지 확인하세요.

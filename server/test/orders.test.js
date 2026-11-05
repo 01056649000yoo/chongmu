@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 const { analyze, cleanOrders } = require('../lib/orders');
-const C = require('../../order-core');
+const C = require('../../public/order-core');
 
 const menu = [
   { name: '짬뽕', price: 9000 },

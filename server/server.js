@@ -5,7 +5,7 @@ const ai = require('./lib/ai');
 const orders = require('./lib/orders');
 const { assertImage, sanitizeNames, sanitizeState, sanitizeHistory } = require('./lib/validate');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', 'public');
 const PORT = Number(process.env.PORT || 8080);
 
 const STATIC_TYPES = {
@@ -20,8 +20,6 @@ const STATIC_TYPES = {
   '.ico': 'image/x-icon',
   '.webp': 'image/webp',
 };
-
-const PRIVATE_PATHS = [/^\/\.env/, /^\/server\//, /^\/node_modules\//, /^\/package/, /^\/\.git\//, /^\/(\.DS_Store|README)/];
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -184,8 +182,7 @@ function serveStatic(req, res, url) {
     throw new HttpError(400, '주소가 올바르지 않아요.');
   }
   if (pathname.includes('\0')) throw new HttpError(400, '주소가 올바르지 않아요.');
-  if (PRIVATE_PATHS.some((re) => re.test(pathname))) throw new HttpError(404, '없는 파일이에요.');
-  if (pathname === '/') pathname = '/index.html';
+  if (pathname === '/' || pathname === '/order.html') pathname = '/index.html';
   const filePath = path.join(ROOT, pathname);
   if (!filePath.startsWith(ROOT + path.sep)) throw new HttpError(404, '없는 파일이에요.');
   fs.stat(filePath, (err, stat) => {
@@ -236,7 +233,8 @@ if (require.main === module) {
     console.log(`총무해방 서버: http://localhost:${PORT}`);
     console.log(`OpenAI 키: ${process.env.OPENAI_API_KEY ? '있음' : '없음 (.env 에 OPENAI_API_KEY 를 넣어 주세요)'}`);
     console.log(`모델: ${process.env.OPENAI_MODEL || orders.DEFAULT_MODEL}`);
-    console.log(`주문 정리: http://localhost:${PORT}/order.html`);
+    console.log(`주문 정리: http://localhost:${PORT}/`);
+    console.log(`여행 정산: http://localhost:${PORT}/trip.html`);
   });
 }
 
